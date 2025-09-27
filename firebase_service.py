@@ -20,26 +20,6 @@ def get_firestore_client():
 
     return restore.client()
 
-# Function to check Ayurvedic knowledge base in Firestore
-def get_ayurvedic_answer(user_query):
-    db = get_firestore_client()
-    if db is None:
-        return None
-        
-    ayurvedic_ref = db.collection("ayurvedic_knowledge")
-    
-    try:
-        docs = ayurvedic_ref.stream()
-        for doc in docs:
-            knowledge_data = doc.to_dict()
-            # Simple keyword matching logic
-            question_keywords = knowledge_data.get("question", "").lower()
-            if any(keyword in user_query.lower() for keyword in question_keywords.split()):
-                return knowledge_data.get("answer", "Answer not found.")
-        return None  # Return None if no match is found
-    except Exception as e:
-        st.error(f"Error accessing Firestore: {e}")
-        return None
 
 # Function to log the conversation to Firestore
 def log_conversation(user_query, detected_intent, bot_response):

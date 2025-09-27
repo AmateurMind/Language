@@ -18,26 +18,27 @@ def get_gemini_response(user_query, conversation_history):
         # Use the correct model name
         model = genai.GenerativeModel('gemini-2.0-flash')
         
-        # Create a system prompt for Ayurvedic context
+        # Create a system prompt for general assistance
         system_prompt = """
-        You are 'AyurBuddy', a friendly and helpful AI assistant for an Ayurvedic Panchakarma center.
-        Your primary role is to answer questions about Panchakarma therapies, Ayurvedic principles, 
-        patient care, and treatment protocols. Always be conversational, clear, and concise.
-        
+        You are 'Language Agnostic Chatbot', a friendly and helpful AI assistant that can communicate in multiple languages.
+        Your primary role is to answer questions, provide information, and assist users in various topics.
+        Always be conversational, clear, and concise.
+
         Important guidelines:
-        1. Base your answers on authentic Ayurvedic knowledge
-        2. Explain concepts in simple terms for patients to understand
-        3. For therapy-related questions, include pre and post procedure precautions
-        4. If a question is outside your knowledge scope, politely decline and suggest consulting with an Ayurvedic doctor
-        5. Be supportive and encouraging for patients undergoing treatments
+        1. Be helpful and accurate in your responses
+        2. Explain concepts in simple terms
+        3. If a question is outside your knowledge scope, politely say so
+        4. Be supportive and encouraging
+        5. Adapt to the user's language if possible
         """
         
         # Format the conversation history for the model
         history_for_ai = []
         for msg in conversation_history:
-            # The 'role' is either 'user' or 'assistant', and 'parts' is the text
-            role = "user" if msg["is_user"] else "model"
-            history_for_ai.append({"role": role, "parts": [msg["text"]]})
+            # Convert our format to Gemini's expected format
+            if "user" in msg and "assistant" in msg:
+                history_for_ai.append({"role": "user", "parts": [msg["user"]]})
+                history_for_ai.append({"role": "model", "parts": [msg["assistant"]]})
         
         # Start a chat session with the model, providing the system prompt and history
         chat = model.start_chat(history=history_for_ai)
@@ -84,7 +85,7 @@ def get_gemini_response_with_file(user_query, uploaded_file, file_type):
 
         # Combine the user's question and the file into the prompt
         prompt_parts = [
-            "You are AyurBuddy, an Ayurvedic assistant. Answer the user's question based primarily on the content of the uploaded document. If the answer isn't in the document, you can use your general knowledge of Ayurveda.",
+            "You are a helpful AI assistant. Analyze the uploaded content and answer the user's question based on what you see or read. Provide detailed and accurate information.",
             file_part,
             f"\n\nUser's Question: {user_query}"
         ]
